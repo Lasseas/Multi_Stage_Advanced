@@ -218,17 +218,21 @@ model.v_new_tech = pyo.Var(model.Technology, domain = pyo.NonNegativeReals, boun
 model.v_new_bat = pyo.Var(model.FlexibleLoad, domain = pyo.NonNegativeReals, bounds = (0, 0))
 model.y_max = pyo.Var(model.Nodes, model.Month, domain = pyo.NonNegativeReals)
 model.d_flex = pyo.Var(model.Nodes, model.EnergyCarrier, domain = pyo.NonNegativeReals)
-model.I_inv = pyo.Var()
+model.Aggregated_Up_Shift = pyo.Var(model.Nodes, model.EnergyCarrier, domain = pyo.NonNegativeReals)
+model.Aggregated_Dwn_Shift = pyo.Var(model.Nodes, model.EnergyCarrier, domain = pyo.NonNegativeReals)
+model.Up_Shift = pyo.Var(model.Nodes, model.EnergyCarrier, domain = pyo.NonNegativeReals)
+model.Dwn_Shift = pyo.Var(model.Nodes, model.EnergyCarrier, domain = pyo.NonNegativeReals)
+
+########## OBJECTIVE VALUES ###########
+model.I_inv = pyo.Var(domain = pyo.NonNegativeReals)
 model.I_GridTariff = pyo.Var()
 model.I_cap_bid = pyo.Var(model.Nodes)
 model.I_activation = pyo.Var(model.Nodes)
 model.I_DA = pyo.Var(model.Nodes)
 model.I_ID = pyo.Var(model.Nodes)
 model.I_OPEX = pyo.Var(model.Nodes)
-model.Aggregated_Up_Shift = pyo.Var(model.Nodes, model.EnergyCarrier,domain = pyo.NonNegativeReals)
-model.Aggregated_Dwn_Shift = pyo.Var(model.Nodes, model.EnergyCarrier, domain = pyo.NonNegativeReals)
-model.Up_Shift = pyo.Var(model.Nodes, model.EnergyCarrier,domain = pyo.NonNegativeReals)
-model.Dwn_Shift = pyo.Var(model.Nodes, model.EnergyCarrier,domain = pyo.NonNegativeReals)
+#Lasse var her:)
+
 
 """
 OBJECTIVE
@@ -455,14 +459,14 @@ def no_up_shift_outside_window(model, n, e):
         return model.Up_Shift[n, e]  == 0
     else:
         return pyo.Constraint.Skip
-model.NoUpShiftOutsideWindow = pyo.Constraint(model.Nodes_RT, model.EnergyCarrier, rule=no_up_shift_outside_window)
+model.NoUpShiftOutsideWindow = pyo.Constraint(model.Nodes, model.EnergyCarrier, rule=no_up_shift_outside_window)
 
 def no_dwn_shift_outside_window(model, n, e):
     if not any(n == load_n[1] for load_n in model.LoadShiftingWindow):
         return model.Dwn_Shift[n, e]  == 0
     else:
         return pyo.Constraint.Skip
-model.NoDwnShiftOutsideWindow = pyo.Constraint(model.Nodes_RT, model.EnergyCarrier, rule=no_dwn_shift_outside_window)
+model.NoDwnShiftOutsideWindow = pyo.Constraint(model.Nodes, model.EnergyCarrier, rule=no_dwn_shift_outside_window)
 
 def Defining_flexible_demand(model, n, e):
     return model.d_flex[n, e] == model.Demand[n, e] + model.Up_Shift[n, e] - model.Dwn_Shift[n, e]
@@ -622,7 +626,7 @@ print("-" * 70)
 """
 EXTRACT VALUE OF VARIABLES AND WRITE THEM INTO EXCEL FILE
 """
-"""
+
 def save_results_to_excel(model_instance, filename="Variable_Results.xlsx"):
     
     # Saves Pyomo variable results into an Excel file with filtered output.
@@ -668,7 +672,7 @@ def save_results_to_excel(model_instance, filename="Variable_Results.xlsx"):
 
 # Usage after solving the model
 save_results_to_excel(our_model, filename="Variable_Results.xlsx")
-"""
+
 
 """
 PLOT RESULTS
