@@ -443,9 +443,17 @@ def aggregated_up_shift(model, n, p, e):
     return model.Aggregated_Up_Shift[n, e] == model.Aggregated_Up_Shift[p, e] + model.Up_Shift[n, e]
 model.AggregatedUpShift = pyo.Constraint(model.Parent_Node, model.EnergyCarrier, rule = aggregated_up_shift)
 
+def initial_agg_up_shift(model, n, e):
+    return model.Aggregated_Up_Shift[n, e] == 0
+model.InitialAggUpShift = pyo.Constraint(model.Nodes_Plan, model.EnergyCarrier, rule = initial_agg_up_shift)    
+
 def aggregated_dwn_shift(model, n, p, e):
     return model.Aggregated_Dwn_Shift[n, e] == model.Aggregated_Dwn_Shift[p, e] + model.Dwn_Shift[n, e]
 model.AggregatedDwnShift = pyo.Constraint(model.Parent_Node, model.EnergyCarrier, rule = aggregated_dwn_shift)
+
+def initial_agg_dwn_shift(model, n, e):
+    return model.Aggregated_Dwn_Shift[n, e] == 0
+model.InitialAggDwnShift = pyo.Constraint(model.Nodes_Plan, model.EnergyCarrier, rule = initial_agg_dwn_shift) 
 
 def load_shifting_balance(model, n, e):
     if any(n == stage[1] for stage in model.LastStageInLoadShiftingWindow):
